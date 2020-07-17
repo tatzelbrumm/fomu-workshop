@@ -22,6 +22,7 @@ SECTIONS
 		*(.rodata .rodata.* .gnu.linkonce.r.*)
 		*(.rodata1)
 		*(.srodata)
+		. = ALIGN(4);
 		_erodata = .;
 	} > rom
 
@@ -31,6 +32,7 @@ SECTIONS
 		_fdata = .;
 		*(.data .data.* .gnu.linkonce.d.*)
 		*(.data1)
+		*(.ramtext .ramtext.*)
 		_gp = ALIGN(16);
 		*(.sdata .sdata.* .gnu.linkonce.s.* .sdata2 .sdata2.*)
 		_edata = ALIGN(16); /* Make sure _edata is >= _gp. */

@@ -12,6 +12,7 @@ README.* text eol=lf
 *.S text eol=lf
 *.h text eol=lf
 *.ld text eol=lf
+*.zig text eol=lf
 hw/bin/* text eol=lf
 Makefile text eol=lf
 *.service text eol=lf
@@ -20,3 +21,9 @@ Makefile text eol=lf
 *.bin binary
 *.elf binary
 *.bin binary
+
+*.gif diff=image
+*.jpeg diff=image
+*.jpg diff=image
+*.png diff=image
+*.gds diff=gds

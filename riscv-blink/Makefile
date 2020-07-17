@@ -2,23 +2,31 @@ GIT_VERSION := $(shell git describe --tags)
 
 # Earlier versions of the Raspberry Pi image only had riscv32-gcc
 ifneq (,$(wildcard /usr/bin/riscv32-unknown-elf-gcc))
-TRGT       ?= riscv32-unknown-elf-
+CROSS_COMPILE       ?= riscv32-unknown-elf-
 else
-TRGT       ?= riscv64-unknown-elf-
+CROSS_COMPILE       ?= riscv64-unknown-elf-
 endif
 
-CC         := $(TRGT)gcc
-CXX        := $(TRGT)g++
-OBJCOPY    := $(TRGT)objcopy
+CC         := $(CROSS_COMPILE)gcc
+CXX        := $(CROSS_COMPILE)g++
+OBJCOPY    := $(CROSS_COMPILE)objcopy
 
 RM         := rm -rf
 COPY       := cp -a
 PATH_SEP   := /
 
 ifeq ($(OS),Windows_NT)
-COPY       := copy
-RM         := del
-PATH_SEP   := \\
+# When SHELL=sh.exe and this actually exists, make will silently
+# switch to using that instead of cmd.exe.  Unfortunately, there's
+# no way to tell which environment we're running under without either
+# (1) printing out an error message, or (2) finding something that
+# works everywhere.
+# As a result, we force the shell to be cmd.exe, so it works both
+# under cygwin and normal Windows.
+SHELL      = cmd.exe
+COPY       = copy
+RM         = del
+PATH_SEP   = \\
 endif
 
 BASE_DIR   := .
@@ -64,7 +72,7 @@ ALL        := all
 TARGET     := $(PACKAGE).elf
 CLEAN      := clean
 
-$(ALL): $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex
+$(ALL): $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex $(PACKAGE).dfu
 
 $(OBJECTS): | $(OBJ_DIR)
 
@@ -76,7 +84,7 @@ $(PACKAGE).bin: $(TARGET)
 	$(QUIET) echo "  OBJCOPY  $@"
 	$(QUIET) $(OBJCOPY) -O binary $(TARGET) $@
 
-$(PACKAGE).dfu: $(TARGET)
+$(PACKAGE).dfu: $(PACKAGE).bin
 	$(QUIET) echo "  DFU      $@"
 	$(QUIET) $(COPY) $(PACKAGE).bin $@
 	$(QUIET) dfu-suffix -v 1209 -p 70b1 -a $@
